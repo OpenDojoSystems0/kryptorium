@@ -1,0 +1,9 @@
+/target
+apps/desktop/node_modules
+apps/desktop/src-tauri/target
+*.vault/
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+apps/desktop/src-tauri/gen/

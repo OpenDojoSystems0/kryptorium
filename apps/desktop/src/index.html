@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kryptorium</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- Écran de verrouillage / sélection du coffre -->
+      <section id="screen-lock" class="screen">
+        <div class="lock-card">
+          <div class="lock-mark">
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4.5" y="10.5" width="15" height="10" rx="2.5" />
+              <path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" />
+            </svg>
+          </div>
+          <h1>Kryptorium</h1>
+          <p class="subtitle">Chiffrement de fichiers et d'images, local et open — XChaCha20-Poly1305 ou AES-256-GCM, dérivation Argon2id</p>
+
+          <label for="vault-path">Emplacement du coffre</label>
+          <input id="vault-path" type="text" spellcheck="false" placeholder="/Users/vous/Kryptorium" />
+
+          <label for="passphrase">Mot de passe</label>
+          <input id="passphrase" type="password" autocomplete="off" spellcheck="false" />
+
+          <button id="advanced-toggle" class="disclosure" type="button" aria-expanded="false">
+            <svg class="chevron" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6" /></svg>
+            Options avancées
+          </button>
+
+          <div id="advanced-panel" class="advanced-panel" hidden>
+            <label for="cipher-select">Algorithme de chiffrement (nouveau coffre uniquement)</label>
+            <select id="cipher-select">
+              <option value="xchacha20poly1305" selected>XChaCha20-Poly1305 — recommandé</option>
+              <option value="aes256gcm">AES-256-GCM — accéléré matériellement (AES-NI)</option>
+            </select>
+            <p class="hint">Choix définitif pour ce coffre : changer d'algorithme plus tard nécessiterait de recréer le coffre.</p>
+          </div>
+
+          <div id="lock-error" class="error" hidden></div>
+
+          <div class="lock-actions">
+            <button id="btn-unlock" class="primary">Déverrouiller</button>
+            <button id="btn-create" class="secondary">Créer un nouveau coffre</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Écran principal (coffre déverrouillé) -->
+      <section id="screen-main" class="screen" hidden>
+        <header class="topbar">
+          <div class="topbar-title">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="topbar-lock-icon">
+              <rect x="4.5" y="10.5" width="15" height="10" rx="2.5" />
+              <path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" />
+            </svg>
+            <span id="vault-path-label"></span>
+          </div>
+          <div class="topbar-actions">
+            <button id="btn-settings" class="icon-btn" title="Réglages" aria-label="Réglages">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3" />
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+              </svg>
+            </button>
+            <button id="btn-lock" class="secondary">Verrouiller</button>
+          </div>
+        </header>
+
+        <div id="dropzone" class="dropzone">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3v12" />
+            <path d="M7 10l5-5 5 5" />
+            <path d="M4 16.5V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2.5" />
+          </svg>
+          <span>Glissez des fichiers ou un dossier ici pour les chiffrer</span>
+        </div>
+
+        <div class="toolbar">
+          <div class="search-field">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="7" />
+              <path d="M21 21l-4.3-4.3" />
+            </svg>
+            <input id="search" type="text" placeholder="Rechercher par nom ou tag…" />
+          </div>
+          <span id="entry-count" class="entry-count"></span>
+        </div>
+
+        <table class="entries">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Taille</th>
+              <th>Ajouté le</th>
+              <th>Tags</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="entries-body"></tbody>
+        </table>
+        <div id="empty-state" class="empty-state" hidden>
+          Le coffre est vide. Glissez des fichiers ou un dossier dans la zone ci-dessus pour commencer.
+        </div>
+      </section>
+    </div>
+
+    <!-- Modale : réglages -->
+    <div id="modal-settings" class="modal-overlay" hidden>
+      <div class="modal modal-settings">
+        <h2>Réglages</h2>
+
+        <div class="settings-section">
+          <h3>Sécurité du coffre</h3>
+          <dl class="info-list">
+            <div><dt>Algorithme</dt><dd id="info-cipher">—</dd></div>
+            <div><dt>Dérivation de clé</dt><dd id="info-kdf">—</dd></div>
+            <div><dt>Créé le</dt><dd id="info-created">—</dd></div>
+            <div><dt>Fichiers</dt><dd id="info-count">—</dd></div>
+          </dl>
+          <button id="btn-open-change-pw" class="secondary full-width">Changer le mot de passe</button>
+        </div>
+
+        <div class="settings-section">
+          <h3>Verrouillage automatique</h3>
+          <label for="autolock-select">Verrouiller après une période d'inactivité</label>
+          <select id="autolock-select">
+            <option value="0">Jamais</option>
+            <option value="1">1 minute</option>
+            <option value="5" selected>5 minutes</option>
+            <option value="15">15 minutes</option>
+            <option value="30">30 minutes</option>
+          </select>
+        </div>
+
+        <div class="settings-section">
+          <h3>AtomasDestruct</h3>
+          <p class="hint">Protections avancées contre la contrainte. Le vrai coffre n'est jamais détruit automatiquement sur simple détection d'altération — seulement sur action volontaire, ou après un seuil de mots de passe incorrects que vous choisissez.</p>
+
+          <dl class="info-list" style="margin-top: 10px;">
+            <div><dt>Mot de passe de contrainte</dt><dd id="info-duress">—</dd></div>
+            <div><dt>Purge après échecs</dt><dd id="info-autowipe">—</dd></div>
+          </dl>
+
+          <button id="btn-open-duress" class="secondary full-width">Mot de passe de contrainte…</button>
+          <button id="btn-open-autowipe" class="secondary full-width">Purge après échecs répétés…</button>
+          <button id="btn-open-panic" class="danger full-width">Détruire ce coffre maintenant</button>
+        </div>
+
+        <div class="settings-section">
+          <h3>À propos</h3>
+          <p class="hint">Kryptorium v0.1 — chiffrement local, aucune donnée envoyée en ligne. XChaCha20-Poly1305 / AES-256-GCM, Argon2id, écritures atomiques.</p>
+        </div>
+
+        <div class="modal-actions">
+          <button id="settings-close" class="primary">Fermer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modale : nouveau mot de passe -->
+    <div id="modal-change-pw" class="modal-overlay" hidden>
+      <div class="modal">
+        <h2>Changer le mot de passe</h2>
+        <label for="pw-old">Mot de passe actuel</label>
+        <input id="pw-old" type="password" autocomplete="off" />
+        <label for="pw-new">Nouveau mot de passe</label>
+        <input id="pw-new" type="password" autocomplete="off" />
+        <label for="pw-new2">Confirmer le nouveau mot de passe</label>
+        <input id="pw-new2" type="password" autocomplete="off" />
+        <div id="pw-error" class="error" hidden></div>
+        <div class="modal-actions">
+          <button id="pw-cancel" class="secondary">Annuler</button>
+          <button id="pw-confirm" class="primary">Confirmer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modale : AtomasDestruct — mot de passe de contrainte -->
+    <div id="modal-duress" class="modal-overlay" hidden>
+      <div class="modal">
+        <h2>Mot de passe de contrainte</h2>
+        <p class="hint">Saisi à l'écran de déverrouillage, ce mot de passe ouvre silencieusement un coffre-leurre distinct à la place de celui-ci — rien à l'écran ne permet de faire la différence. Le vrai coffre reste présent sur le disque à son emplacement : ce n'est pas un volume caché, une analyse forensique du support peut en révéler l'existence même si son contenu reste illisible.</p>
+
+        <label for="duress-decoy-path">Emplacement du coffre-leurre</label>
+        <input id="duress-decoy-path" type="text" spellcheck="false" placeholder="/Users/vous/Kryptorium-Leurre" />
+
+        <label for="duress-passphrase">Mot de passe de contrainte</label>
+        <input id="duress-passphrase" type="password" autocomplete="off" />
+
+        <label for="duress-passphrase2">Confirmer</label>
+        <input id="duress-passphrase2" type="password" autocomplete="off" />
+
+        <div id="duress-error" class="error" hidden></div>
+        <div class="modal-actions duress-actions">
+          <button id="duress-clear" class="danger-ghost">Désactiver</button>
+          <button id="duress-cancel" class="secondary">Annuler</button>
+          <button id="duress-confirm" class="primary">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modale : AtomasDestruct — purge après échecs -->
+    <div id="modal-autowipe" class="modal-overlay" hidden>
+      <div class="modal">
+        <h2>Purge après échecs répétés</h2>
+        <p class="hint">Détruit irréversiblement ce coffre après ce nombre de mots de passe incorrects consécutifs saisis dans l'application. Ne protège pas contre quelqu'un ayant déjà une copie du coffre (voir le README) — c'est Argon2id qui protège contre ce cas-là.</p>
+        <label for="autowipe-select">Seuil</label>
+        <select id="autowipe-select">
+          <option value="0">Désactivé</option>
+          <option value="5">5 tentatives</option>
+          <option value="10">10 tentatives</option>
+          <option value="20">20 tentatives</option>
+        </select>
+        <div class="modal-actions">
+          <button id="autowipe-cancel" class="secondary">Annuler</button>
+          <button id="autowipe-confirm" class="primary">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modale : AtomasDestruct — destruction immédiate -->
+    <div id="modal-panic" class="modal-overlay" hidden>
+      <div class="modal">
+        <h2>Détruire ce coffre maintenant</h2>
+        <p class="hint">Action <strong>immédiate et irréversible</strong>. Tous les fichiers de ce coffre vont être écrasés puis supprimés définitivement. Tapez <strong>DETRUIRE</strong> pour confirmer.</p>
+        <input id="panic-confirm-input" type="text" spellcheck="false" placeholder="DETRUIRE" />
+        <div id="panic-error" class="error" hidden></div>
+        <div class="modal-actions">
+          <button id="panic-cancel" class="secondary">Annuler</button>
+          <button id="panic-confirm" class="danger" disabled>Détruire définitivement</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modale : export -->
+    <div id="modal-export" class="modal-overlay" hidden>
+      <div class="modal">
+        <h2>Exporter (déchiffrer)</h2>
+        <label for="export-path">Chemin de destination</label>
+        <input id="export-path" type="text" spellcheck="false" />
+        <div id="export-error" class="error" hidden></div>
+        <div class="modal-actions">
+          <button id="export-cancel" class="secondary">Annuler</button>
+          <button id="export-confirm" class="primary">Exporter</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modale : tags -->
+    <div id="modal-tags" class="modal-overlay" hidden>
+      <div class="modal">
+        <h2>Modifier les tags</h2>
+        <label for="tags-input">Tags séparés par des virgules</label>
+        <input id="tags-input" type="text" spellcheck="false" />
+        <div class="modal-actions">
+          <button id="tags-cancel" class="secondary">Annuler</button>
+          <button id="tags-confirm" class="primary">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modale : aperçu image -->
+    <div id="modal-preview" class="modal-overlay" hidden>
+      <div class="modal modal-preview">
+        <img id="preview-img" alt="aperçu" />
+        <div class="modal-actions">
+          <button id="preview-close" class="secondary">Fermer</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast" hidden></div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
