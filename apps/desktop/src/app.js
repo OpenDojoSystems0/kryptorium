@@ -326,17 +326,22 @@ async function addFiles(paths) {
   }
 }
 
-getCurrentWebview().onDragDropEvent((event) => {
-  const p = event.payload;
-  if (p.type === "over" || p.type === "enter") {
-    dropzone.classList.add("dragover");
-  } else if (p.type === "drop") {
-    dropzone.classList.remove("dragover");
-    addFiles(p.paths);
-  } else {
-    dropzone.classList.remove("dragover");
-  }
-});
+getCurrentWebview()
+  .onDragDropEvent((event) => {
+    const p = event.payload;
+    if (p.type === "over") {
+      dropzone.classList.add("dragover");
+    } else if (p.type === "drop") {
+      dropzone.classList.remove("dragover");
+      addFiles(p.paths);
+    } else {
+      // "leave" (ou tout autre cas) : annule l'état visuel de survol.
+      dropzone.classList.remove("dragover");
+    }
+  })
+  .catch((e) => {
+    showToast("Glisser-déposer indisponible : " + errorMessage(e), true);
+  });
 
 // ---------- Modale : tags ----------
 
