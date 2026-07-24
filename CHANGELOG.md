@@ -3,6 +3,15 @@
 Toutes les modifications notables de ce projet sont documentées ici.
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
+## [0.1.1]
+
+### Corrigé
+
+- Glisser-déposer de fichiers/dossiers non fonctionnel : le projet ne
+  déclarait aucune capacité Tauri (`capabilities/`), ce qui bloquait
+  silencieusement l'API webview `onDragDropEvent`. Ajout du fichier de
+  capacités manquant.
+
 ## [0.1.0] - Première version
 
 ### Ajouté
